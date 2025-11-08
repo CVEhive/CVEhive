@@ -84,7 +84,7 @@ class GitHubMCPClient:
             await self.session.__aenter__()
             await self.session.initialize()
             self._initialized = True
-            logger.info("✅ Connected to GitHub MCP server")
+            logger.info("[PASS] Connected to GitHub MCP server")
                     
         except ImportError:
             logger.error("MCP SDK not installed. Install with: pip install mcp")

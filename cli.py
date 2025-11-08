@@ -37,24 +37,24 @@ def db():
 @db.command()
 def init():
     """Initialize database tables."""
-    click.echo("🗄️  Initializing database...")
+    click.echo("  Initializing database...")
     try:
         create_tables()
-        click.echo("✅ Database initialized successfully!")
+        click.echo("[PASS] Database initialized successfully!")
     except Exception as e:
-        click.echo(f"❌ Error initializing database: {str(e)}")
+        click.echo(f"[FAIL] Error initializing database: {str(e)}")
 
 @db.command()
 @click.confirmation_option(prompt='Are you sure you want to drop all tables?')
 def reset():
     """Reset database (drop and recreate all tables)."""
-    click.echo("🗄️  Resetting database...")
+    click.echo("  Resetting database...")
     try:
         drop_tables()
         create_tables()
-        click.echo("✅ Database reset successfully!")
+        click.echo("[PASS] Database reset successfully!")
     except Exception as e:
-        click.echo(f"❌ Error resetting database: {str(e)}")
+        click.echo(f"[FAIL] Error resetting database: {str(e)}")
 
 @db.command()
 def stats():
@@ -78,7 +78,7 @@ def stats():
             Exploit.created_at >= last_week
         ).count()
         
-        click.echo("📊 Database Statistics:")
+        click.echo("[INFO] Database Statistics:")
         click.echo(f"   Total CVEs: {total_cves:,}")
         click.echo(f"   Total Exploits: {total_exploits:,}")
         click.echo(f"   Total Validations: {total_validations:,}")
@@ -93,7 +93,7 @@ def stats():
         db_session.close()
         
     except Exception as e:
-        click.echo(f"❌ Error getting database stats: {str(e)}")
+        click.echo(f"[FAIL] Error getting database stats: {str(e)}")
 
 @cli.group()
 def scrape():
@@ -105,17 +105,17 @@ def scrape():
 @click.option('--api-key', help='NVD API key for higher rate limits')
 def nvd(days, api_key):
     """Scrape CVEs from NVD (National Vulnerability Database)."""
-    click.echo(f"🔍 Scraping CVEs from NVD (last {days} days)...")
+    click.echo(f"[SEARCH] Scraping CVEs from NVD (last {days} days)...")
     
     try:
         scraper = NVDScraper(api_key=api_key)
         cves_data = scraper.fetch_recent_cves(days=days)
         
         if not cves_data:
-            click.echo("ℹ️  No CVEs found")
+            click.echo("[INFO]  No CVEs found")
             return
         
-        click.echo(f"📥 Fetched {len(cves_data)} CVEs, saving to database...")
+        click.echo(f"[FETCH] Fetched {len(cves_data)} CVEs, saving to database...")
         
         # Parse CVEs
         parsed_cves = []
@@ -128,10 +128,10 @@ def nvd(days, api_key):
                 continue
         
         saved_count = scraper.save_cves_to_database(parsed_cves)
-        click.echo(f"✅ Saved {saved_count} new CVEs to database!")
+        click.echo(f"[PASS] Saved {saved_count} new CVEs to database!")
         
     except Exception as e:
-        click.echo(f"❌ Error scraping NVD: {str(e)}")
+        click.echo(f"[FAIL] Error scraping NVD: {str(e)}")
         logging.error(f"NVD scraping error: {str(e)}")
 
 @scrape.command()
@@ -139,23 +139,23 @@ def nvd(days, api_key):
 @click.option('--limit', default=100, help='Maximum number of exploits to fetch')
 def github(days, limit):
     """Scrape exploits from GitHub."""
-    click.echo(f"🔍 Scraping exploits from GitHub (last {days} days)...")
+    click.echo(f"[SEARCH] Scraping exploits from GitHub (last {days} days)...")
     
     try:
         scraper = GitHubScraper()
         exploits_data = scraper.search_recent_exploits(days=days, limit=limit)
         
         if not exploits_data:
-            click.echo("ℹ️  No exploits found")
+            click.echo("[INFO]  No exploits found")
             return
         
-        click.echo(f"📥 Found {len(exploits_data)} exploits, saving to database...")
+        click.echo(f"[FETCH] Found {len(exploits_data)} exploits, saving to database...")
         saved_count = scraper.save_exploits_to_database(exploits_data)
         
-        click.echo(f"✅ Saved {saved_count} new exploits to database!")
+        click.echo(f"[PASS] Saved {saved_count} new exploits to database!")
         
     except Exception as e:
-        click.echo(f"❌ Error scraping GitHub: {str(e)}")
+        click.echo(f"[FAIL] Error scraping GitHub: {str(e)}")
         logging.error(f"GitHub scraping error: {str(e)}")
 
 @scrape.command()
@@ -163,30 +163,30 @@ def github(days, limit):
 @click.option('--limit', default=100, help='Maximum number of exploits to fetch')
 def exploitdb(days, limit):
     """Scrape exploits from ExploitDB."""
-    click.echo(f"🔍 Scraping exploits from ExploitDB (last {days} days)...")
+    click.echo(f"[SEARCH] Scraping exploits from ExploitDB (last {days} days)...")
     
     try:
         scraper = ExploitDBScraper()
         exploits_data = scraper.search_recent_exploits(days=days, limit=limit)
         
         if not exploits_data:
-            click.echo("ℹ️  No exploits found")
+            click.echo("[INFO]  No exploits found")
             return
         
-        click.echo(f"📥 Found {len(exploits_data)} exploits, saving to database...")
+        click.echo(f"[FETCH] Found {len(exploits_data)} exploits, saving to database...")
         saved_count = scraper.save_exploits_to_database(exploits_data)
         
-        click.echo(f"✅ Saved {saved_count} new exploits to database!")
+        click.echo(f"[PASS] Saved {saved_count} new exploits to database!")
         
     except Exception as e:
-        click.echo(f"❌ Error scraping ExploitDB: {str(e)}")
+        click.echo(f"[FAIL] Error scraping ExploitDB: {str(e)}")
         logging.error(f"ExploitDB scraping error: {str(e)}")
 
 @scrape.command()
 @click.argument('cve_id')
 def exploits(cve_id):
     """Search for exploits for a specific CVE."""
-    click.echo(f"🔍 Searching exploits for {cve_id}...")
+    click.echo(f"[SEARCH] Searching exploits for {cve_id}...")
     
     total_found = 0
     total_saved = 0
@@ -201,7 +201,7 @@ def exploits(cve_id):
         total_found += len(github_exploits)
         total_saved += github_saved
     except Exception as e:
-        click.echo(f"    ❌ GitHub search failed: {str(e)}")
+        click.echo(f"    [FAIL] GitHub search failed: {str(e)}")
     
     # Search ExploitDB
     try:
@@ -213,46 +213,46 @@ def exploits(cve_id):
         total_found += len(exploitdb_exploits)
         total_saved += exploitdb_saved
     except Exception as e:
-        click.echo(f"    ❌ ExploitDB search failed: {str(e)}")
+        click.echo(f"    [FAIL] ExploitDB search failed: {str(e)}")
     
-    click.echo(f"✅ Total found: {total_found}, Total saved: {total_saved}")
+    click.echo(f"[PASS] Total found: {total_found}, Total saved: {total_saved}")
 
 @scrape.command()
 @click.argument('cve_id')
 def cve(cve_id):
     """Fetch a specific CVE by ID."""
-    click.echo(f"🔍 Fetching CVE {cve_id}...")
+    click.echo(f"[SEARCH] Fetching CVE {cve_id}...")
     
     try:
         scraper = NVDScraper()
         cve_data = scraper.fetch_cve_by_id(cve_id)
         
         if not cve_data:
-            click.echo(f"❌ CVE {cve_id} not found")
+            click.echo(f"[FAIL] CVE {cve_id} not found")
             return
         
         parsed_cve = scraper.parse_cve_data(cve_data)
         saved_count = scraper.save_cves_to_database([parsed_cve])
         
         if saved_count > 0:
-            click.echo(f"✅ Saved CVE {cve_id} to database!")
+            click.echo(f"[PASS] Saved CVE {cve_id} to database!")
         else:
-            click.echo(f"ℹ️  CVE {cve_id} already exists in database")
+            click.echo(f"[INFO]  CVE {cve_id} already exists in database")
         
     except Exception as e:
-        click.echo(f"❌ Error fetching CVE: {str(e)}")
+        click.echo(f"[FAIL] Error fetching CVE: {str(e)}")
 
 @scrape.command()
 def trickest():
     """Sync with Trickest CVE repository for validated PoCs."""
-    click.echo("🎯 Syncing with Trickest CVE repository...")
+    click.echo("[SYNC] Syncing with Trickest CVE repository...")
     
     try:
         count = sync_trickest()
-        click.echo(f"✅ Synced {count} new exploits from Trickest!")
+        click.echo(f"[PASS] Synced {count} new exploits from Trickest!")
         
     except Exception as e:
-        click.echo(f"❌ Error syncing Trickest: {str(e)}")
+        click.echo(f"[FAIL] Error syncing Trickest: {str(e)}")
         logging.error(f"Trickest sync error: {str(e)}")
 
 @scrape.command()
@@ -268,10 +268,10 @@ def repositories():
             click.echo(f"  {repo_name}: {count} new exploits")
             total_synced += count
         
-        click.echo(f"✅ Total synced: {total_synced} new exploits from all repositories!")
+        click.echo(f"[PASS] Total synced: {total_synced} new exploits from all repositories!")
         
     except Exception as e:
-        click.echo(f"❌ Error syncing repositories: {str(e)}")
+        click.echo(f"[FAIL] Error syncing repositories: {str(e)}")
         logging.error(f"Repository sync error: {str(e)}")
 
 @scrape.command()
@@ -280,7 +280,7 @@ def repositories():
 def repo(repository):
     """Sync with a specific notable repository."""
     if not repository:
-        click.echo("❌ Please specify a repository: --repository [trickest|poc_in_github|pocsuite3]")
+        click.echo("[FAIL] Please specify a repository: --repository [trickest|poc_in_github|pocsuite3]")
         return
     
     click.echo(f"📦 Syncing with {repository} repository...")
@@ -288,16 +288,16 @@ def repo(repository):
     try:
         scraper = RepositoryScraper()
         count = scraper.sync_repository(repository)
-        click.echo(f"✅ Synced {count} new exploits from {repository}!")
+        click.echo(f"[PASS] Synced {count} new exploits from {repository}!")
         
     except Exception as e:
-        click.echo(f"❌ Error syncing {repository}: {str(e)}")
+        click.echo(f"[FAIL] Error syncing {repository}: {str(e)}")
         logging.error(f"{repository} sync error: {str(e)}")
 
 @scrape.command()
 def repo_stats():
     """Show statistics for notable repositories."""
-    click.echo("📊 Repository Statistics:")
+    click.echo("[INFO] Repository Statistics:")
     
     try:
         scraper = RepositoryScraper()
@@ -305,7 +305,7 @@ def repo_stats():
         
         for repo_key, repo_stats in stats.items():
             if 'error' in repo_stats:
-                click.echo(f"  {repo_stats['name']}: ❌ {repo_stats['error']}")
+                click.echo(f"  {repo_stats['name']}: [FAIL] {repo_stats['error']}")
             else:
                 validation_rate = repo_stats['validation_rate'] * 100
                 click.echo(f"  {repo_stats['name']}:")
@@ -316,7 +316,7 @@ def repo_stats():
                 click.echo(f"    Confidence: {repo_stats['confidence']:.1%}")
         
     except Exception as e:
-        click.echo(f"❌ Error getting repository stats: {str(e)}")
+        click.echo(f"[FAIL] Error getting repository stats: {str(e)}")
 
 @cli.group()
 def validate():
@@ -329,13 +329,13 @@ def validate():
 @click.option('--limit', default=10, help='Maximum number of exploits to validate')
 def pending():
     """Validate pending exploits."""
-    click.echo(f"🔍 Validating pending exploits (level: {level})...")
+    click.echo(f"[SEARCH] Validating pending exploits (level: {level})...")
     
     try:
         # Check if Docker is available for advanced validation
         sandbox = DockerSandbox()
         if level in ['standard', 'comprehensive'] and not sandbox.is_available():
-            click.echo("⚠️  Docker not available, falling back to basic validation")
+            click.echo("[WARN]  Docker not available, falling back to basic validation")
             level = 'basic'
         
         validator = ExploitValidator()
@@ -349,7 +349,7 @@ def pending():
         ).limit(limit).all()
         
         if not exploits:
-            click.echo("ℹ️  No pending exploits found")
+            click.echo("[INFO]  No pending exploits found")
             return
         
         click.echo(f"📋 Found {len(exploits)} pending exploits")
@@ -362,17 +362,17 @@ def pending():
                 result = validator.validate_exploit(exploit, validation_level=level)
                 if result.is_validated:
                     validated_count += 1
-                    click.echo(f"    ✅ Validated (Score: {result.validation_score:.1f}/10)")
+                    click.echo(f"    [PASS] Validated (Score: {result.validation_score:.1f}/10)")
                 else:
-                    click.echo(f"    ❌ Not validated (Score: {result.validation_score:.1f}/10)")
+                    click.echo(f"    [FAIL] Not validated (Score: {result.validation_score:.1f}/10)")
             except Exception as e:
-                click.echo(f"    ❌ Validation failed: {str(e)}")
+                click.echo(f"    [FAIL] Validation failed: {str(e)}")
         
-        click.echo(f"✅ Validation complete: {validated_count}/{len(exploits)} validated")
+        click.echo(f"[PASS] Validation complete: {validated_count}/{len(exploits)} validated")
         db_session.close()
         
     except Exception as e:
-        click.echo(f"❌ Error during validation: {str(e)}")
+        click.echo(f"[FAIL] Error during validation: {str(e)}")
 
 @validate.command()
 @click.argument('exploit_id', type=int)
@@ -380,13 +380,13 @@ def pending():
               help='Validation level (default: standard)')
 def exploit(exploit_id, level):
     """Validate a specific exploit by ID."""
-    click.echo(f"🔍 Validating exploit {exploit_id} (level: {level})...")
+    click.echo(f"[SEARCH] Validating exploit {exploit_id} (level: {level})...")
     
     try:
         # Check if Docker is available for advanced validation
         sandbox = DockerSandbox()
         if level in ['standard', 'comprehensive'] and not sandbox.is_available():
-            click.echo("⚠️  Docker not available, falling back to basic validation")
+            click.echo("[WARN]  Docker not available, falling back to basic validation")
             level = 'basic'
         
         validator = ExploitValidator()
@@ -396,7 +396,7 @@ def exploit(exploit_id, level):
         exploit_obj = db_session.query(Exploit).filter(Exploit.id == exploit_id).first()
         
         if not exploit_obj:
-            click.echo(f"❌ Exploit {exploit_id} not found")
+            click.echo(f"[FAIL] Exploit {exploit_id} not found")
             return
         
         click.echo(f"📋 Exploit: {exploit_obj.title}")
@@ -405,11 +405,11 @@ def exploit(exploit_id, level):
         
         result = validator.validate_exploit(exploit_obj, validation_level=level)
         
-        click.echo(f"\n📊 Validation Results:")
-        click.echo(f"    Status: {'✅ Validated' if result.is_validated else '❌ Not Validated'}")
+        click.echo(f"\n[INFO] Validation Results:")
+        click.echo(f"    Status: {'[PASS] Validated' if result.is_validated else '[FAIL] Not Validated'}")
         click.echo(f"    Score: {result.validation_score:.1f}/10")
-        click.echo(f"    Syntax Valid: {'✅' if result.syntax_valid else '❌'}")
-        click.echo(f"    Execution: {'✅' if result.execution_successful else '❌'}")
+        click.echo(f"    Syntax Valid: {'[PASS]' if result.syntax_valid else '[FAIL]'}")
+        click.echo(f"    Execution: {'[PASS]' if result.execution_successful else '[FAIL]'}")
         
         if result.security_analysis_results:
             security = result.security_analysis_results
@@ -420,7 +420,7 @@ def exploit(exploit_id, level):
         db_session.close()
         
     except Exception as e:
-        click.echo(f"❌ Error validating exploit: {str(e)}")
+        click.echo(f"[FAIL] Error validating exploit: {str(e)}")
 
 @validate.command()
 def stats():
@@ -429,15 +429,15 @@ def stats():
         validator = ExploitValidator()
         stats = validator.get_validation_statistics()
         
-        click.echo("📊 Validation Statistics:")
+        click.echo("[INFO] Validation Statistics:")
         click.echo(f"   Total Validations: {stats['total_validations']:,}")
         click.echo(f"   Successful Validations: {stats['successful_validations']:,}")
         click.echo(f"   Success Rate: {stats['success_rate']:.1%}")
         click.echo(f"   Average Score: {stats['average_score']:.1f}/10")
-        click.echo(f"   Sandbox Available: {'✅' if stats['sandbox_available'] else '❌'}")
+        click.echo(f"   Sandbox Available: {'[PASS]' if stats['sandbox_available'] else '[FAIL]'}")
         
     except Exception as e:
-        click.echo(f"❌ Error getting validation stats: {str(e)}")
+        click.echo(f"[FAIL] Error getting validation stats: {str(e)}")
 
 @cli.group()
 def docker():
@@ -452,7 +452,7 @@ def status():
         info = sandbox.get_system_info()
         
         if info['available']:
-            click.echo("🐳 Docker Status: ✅ Available")
+            click.echo("[DOCKER] Docker Status: [PASS] Available")
             click.echo(f"   Version: {info['version']['Version']}")
             click.echo(f"   Running Containers: {info['containers_running']}")
             click.echo(f"   Total Containers: {info['containers_total']}")
@@ -460,40 +460,40 @@ def status():
             click.echo(f"   Memory: {info['memory_total'] // (1024**3):.1f} GB")
             click.echo(f"   CPUs: {info['cpu_count']}")
         else:
-            click.echo("🐳 Docker Status: ❌ Not Available")
+            click.echo("[DOCKER] Docker Status: [FAIL] Not Available")
             if 'error' in info:
                 click.echo(f"   Error: {info['error']}")
         
     except Exception as e:
-        click.echo(f"❌ Error checking Docker status: {str(e)}")
+        click.echo(f"[FAIL] Error checking Docker status: {str(e)}")
 
 @docker.command()
 def build():
     """Build the CVEhive sandbox image."""
-    click.echo("🐳 Building CVEhive sandbox image...")
+    click.echo("[DOCKER] Building CVEhive sandbox image...")
     
     try:
         sandbox = DockerSandbox()
         if sandbox.create_sandbox_image():
-            click.echo("✅ Sandbox image built successfully!")
+            click.echo("[PASS] Sandbox image built successfully!")
         else:
-            click.echo("❌ Failed to build sandbox image")
+            click.echo("[FAIL] Failed to build sandbox image")
         
     except Exception as e:
-        click.echo(f"❌ Error building sandbox image: {str(e)}")
+        click.echo(f"[FAIL] Error building sandbox image: {str(e)}")
 
 @docker.command()
 def cleanup():
     """Clean up old Docker containers and networks."""
-    click.echo("🐳 Cleaning up old Docker resources...")
+    click.echo("[DOCKER] Cleaning up old Docker resources...")
     
     try:
         sandbox = DockerSandbox()
         sandbox.cleanup_old_containers()
-        click.echo("✅ Cleanup completed!")
+        click.echo("[PASS] Cleanup completed!")
         
     except Exception as e:
-        click.echo(f"❌ Error during cleanup: {str(e)}")
+        click.echo(f"[FAIL] Error during cleanup: {str(e)}")
 
 @cli.command()
 @click.option('--host', default='0.0.0.0', help='Host to bind to')
@@ -501,7 +501,7 @@ def cleanup():
 @click.option('--debug', is_flag=True, help='Enable debug mode')
 def run(host, port, debug):
     """Run the CVEhive web application."""
-    click.echo("🚀 Starting CVEhive web application...")
+    click.echo("[RUN] Starting CVEhive web application...")
     click.echo(f"   Host: {host}")
     click.echo(f"   Port: {port}")
     click.echo(f"   Debug: {debug}")
@@ -511,20 +511,20 @@ def run(host, port, debug):
         from app import app
         app.run(host=host, port=port, debug=debug)
     except Exception as e:
-        click.echo(f"❌ Error starting application: {str(e)}")
+        click.echo(f"[FAIL] Error starting application: {str(e)}")
 
 @cli.command()
 def setup():
     """Setup CVEhive with sample data."""
-    click.echo("🛠️  Setting up CVEhive...")
+    click.echo("[SETUP]  Setting up CVEhive...")
     
     # Initialize database
     click.echo("1. Initializing database...")
     try:
         create_tables()
-        click.echo("   ✅ Database initialized")
+        click.echo("   [PASS] Database initialized")
     except Exception as e:
-        click.echo(f"   ❌ Database initialization failed: {str(e)}")
+        click.echo(f"   [FAIL] Database initialization failed: {str(e)}")
         return
     
     # Check Docker
@@ -532,15 +532,15 @@ def setup():
     try:
         sandbox = DockerSandbox()
         if sandbox.is_available():
-            click.echo("   ✅ Docker available")
+            click.echo("   [PASS] Docker available")
             if sandbox.create_sandbox_image():
-                click.echo("   ✅ Sandbox image built")
+                click.echo("   [PASS] Sandbox image built")
             else:
-                click.echo("   ⚠️  Failed to build sandbox image")
+                click.echo("   [WARN]  Failed to build sandbox image")
         else:
-            click.echo("   ⚠️  Docker not available (validation will be limited)")
+            click.echo("   [WARN]  Docker not available (validation will be limited)")
     except Exception as e:
-        click.echo(f"   ⚠️  Docker check failed: {str(e)}")
+        click.echo(f"   [WARN]  Docker check failed: {str(e)}")
     
     # Fetch recent CVEs
     click.echo("3. Fetching recent CVEs from NVD...")
@@ -558,11 +558,11 @@ def setup():
                     continue
             
             saved_count = scraper.save_cves_to_database(parsed_cves)
-            click.echo(f"   ✅ Saved {saved_count} CVEs")
+            click.echo(f"   [PASS] Saved {saved_count} CVEs")
         else:
-            click.echo("   ⚠️  No CVEs found")
+            click.echo("   [WARN]  No CVEs found")
     except Exception as e:
-        click.echo(f"   ❌ CVE fetching failed: {str(e)}")
+        click.echo(f"   [FAIL] CVE fetching failed: {str(e)}")
     
     # Fetch some exploits
     click.echo("4. Fetching recent exploits...")
@@ -572,11 +572,11 @@ def setup():
         
         if exploits_data:
             saved_count = github_scraper.save_exploits_to_database(exploits_data)
-            click.echo(f"   ✅ Saved {saved_count} exploits from GitHub")
+            click.echo(f"   [PASS] Saved {saved_count} exploits from GitHub")
         else:
-            click.echo("   ⚠️  No exploits found on GitHub")
+            click.echo("   [WARN]  No exploits found on GitHub")
     except Exception as e:
-        click.echo(f"   ❌ Exploit fetching failed: {str(e)}")
+        click.echo(f"   [FAIL] Exploit fetching failed: {str(e)}")
     
     click.echo("\n🎉 Setup complete!")
     click.echo("You can now run:")
@@ -601,10 +601,10 @@ def cves(query, limit):
         results = search_engine.search_cves(query, limit=limit)
         
         if not results:
-            click.echo("ℹ️  No CVEs found")
+            click.echo("[INFO]  No CVEs found")
             return
         
-        click.echo(f"🔍 Found {len(results)} CVEs:")
+        click.echo(f"[SEARCH] Found {len(results)} CVEs:")
         for cve in results:
             click.echo(f"  {cve.cve_id} - {cve.summary[:80]}...")
             click.echo(f"    CVSS: {cve.cvss_v3_score or cve.cvss_v2_score or 'N/A'}")
@@ -612,7 +612,7 @@ def cves(query, limit):
             click.echo()
         
     except Exception as e:
-        click.echo(f"❌ Error searching CVEs: {str(e)}")
+        click.echo(f"[FAIL] Error searching CVEs: {str(e)}")
 
 @search.command()
 @click.argument('query')
@@ -626,10 +626,10 @@ def exploits(query, limit):
         results = search_engine.search_exploits(query, limit=limit)
         
         if not results:
-            click.echo("ℹ️  No exploits found")
+            click.echo("[INFO]  No exploits found")
             return
         
-        click.echo(f"🔍 Found {len(results)} exploits:")
+        click.echo(f"[SEARCH] Found {len(results)} exploits:")
         for exploit in results:
             click.echo(f"  {exploit.title}")
             click.echo(f"    Source: {exploit.source}")
@@ -638,7 +638,7 @@ def exploits(query, limit):
             click.echo()
         
     except Exception as e:
-        click.echo(f"❌ Error searching exploits: {str(e)}")
+        click.echo(f"[FAIL] Error searching exploits: {str(e)}")
 
 @cli.group()
 def analyze():
@@ -660,8 +660,8 @@ def cve(cve_id, limit, min_score):
     4. Filter based on analysis
     5. Save for dynamic analysis
     """
-    click.echo(f"🤖 MCP/AI-Powered CVE Analysis: {cve_id}")
-    click.echo(f"📊 Discovering up to {limit} repositories via MCP...\n")
+    click.echo(f"[AI] MCP/AI-Powered CVE Analysis: {cve_id}")
+    click.echo(f"[INFO] Discovering up to {limit} repositories via MCP...\n")
     
     try:
         import asyncio
@@ -674,43 +674,43 @@ def cve(cve_id, limit, min_score):
         results = asyncio.run(pipeline.process_cve(cve_id, limit=limit))
         
         click.echo("=" * 50)
-        click.echo("📊 PIPELINE RESULTS")
+        click.echo("[INFO] PIPELINE RESULTS")
         click.echo("=" * 50)
         
         # Stage 1: MCP Discovery
         stage1 = results.get('stage_1_mcp_discovery', {})
-        click.echo(f"\n🔍 Stage 1 - MCP/AI Discovery:")
+        click.echo(f"\n[SEARCH] Stage 1 - MCP/AI Discovery:")
         click.echo(f"   Repositories found: {stage1.get('repositories_found', 0)}")
         
         # Stage 2: Static Analysis
         stage2 = results.get('stage_2_static_analysis', {})
-        click.echo(f"\n🔬 Stage 2 - Static Analysis:")
+        click.echo(f"\n[ANALYZE] Stage 2 - Static Analysis:")
         click.echo(f"   Files analyzed: {stage2.get('files_analyzed', 0)}")
         
         # Stage 3: Filtering
         stage3 = results.get('stage_3_filtering', {})
-        click.echo(f"\n🎯 Stage 3 - Filtering:")
+        click.echo(f"\n[SYNC] Stage 3 - Filtering:")
         click.echo(f"   Before filtering: {stage3.get('before_filtering', 0)}")
         click.echo(f"   After filtering: {stage3.get('after_filtering', 0)}")
         click.echo(f"   Filtered out: {stage3.get('filtered_out', 0)}")
         
         # Stage 4: Saved
         stage4 = results.get('stage_4_saved', {})
-        click.echo(f"\n💾 Stage 4 - Saved for Dynamic Analysis:")
+        click.echo(f"\n[SAVE] Stage 4 - Saved for Dynamic Analysis:")
         click.echo(f"   Exploits saved: {stage4.get('exploits_saved', 0)}")
         click.echo(f"   Ready for dynamic analysis: {stage4.get('ready_for_dynamic_analysis', 0)}")
         
         if results.get('errors'):
-            click.echo(f"\n⚠️  Errors: {len(results['errors'])}")
+            click.echo(f"\n[WARN]  Errors: {len(results['errors'])}")
             for error in results['errors'][:3]:
                 click.echo(f"   - {error}")
         
-        click.echo(f"\n✅ Pipeline complete!")
-        click.echo(f"💡 Next: Run dynamic analysis stage")
-        click.echo(f"💡 View results: python3 cli.py db stats")
+        click.echo(f"\n[PASS] Pipeline complete!")
+        click.echo(f"[TIP] Next: Run dynamic analysis stage")
+        click.echo(f"[TIP] View results: python3 cli.py db stats")
         
     except Exception as e:
-        click.echo(f"❌ Error: {str(e)}")
+        click.echo(f"[FAIL] Error: {str(e)}")
         logging.error(f"Analysis error: {str(e)}")
 
 @analyze.command()
@@ -721,8 +721,8 @@ def cve(cve_id, limit, min_score):
 @click.option('--min-score', default=50, help='Minimum baseline score for filtering')
 def batch(severity, limit, repos_per_cve, min_score):
     """Batch analyze multiple CVEs using MCP/AI pipeline."""
-    click.echo(f"🤖 Batch MCP/AI Analysis")
-    click.echo(f"📊 Processing {limit} CVEs ({repos_per_cve} repos each)...\n")
+    click.echo(f"[AI] Batch MCP/AI Analysis")
+    click.echo(f"[INFO] Processing {limit} CVEs ({repos_per_cve} repos each)...\n")
     
     try:
         import asyncio
@@ -741,7 +741,7 @@ def batch(severity, limit, repos_per_cve, min_score):
         cves = query.filter(CVE.has_exploit == False).limit(limit).all()
         
         if not cves:
-            click.echo("ℹ️  No CVEs found matching criteria")
+            click.echo("[INFO]  No CVEs found matching criteria")
             return
         
         click.echo(f"Found {len(cves)} CVEs to analyze\n")
@@ -753,16 +753,16 @@ def batch(severity, limit, repos_per_cve, min_score):
         summary = asyncio.run(pipeline.process_multiple_cves(cve_ids, limit_per_cve=repos_per_cve))
         
         click.echo("\n" + "=" * 50)
-        click.echo("📊 BATCH ANALYSIS SUMMARY")
+        click.echo("[INFO] BATCH ANALYSIS SUMMARY")
         click.echo("=" * 50)
         click.echo(f"CVEs processed: {summary['processed']}/{summary['total_cves']}")
         click.echo(f"Total exploits saved: {summary['total_exploits_saved']}")
-        click.echo(f"💡 All saved exploits are ready for dynamic analysis stage")
+        click.echo(f"[TIP] All saved exploits are ready for dynamic analysis stage")
         
         db.close()
         
     except Exception as e:
-        click.echo(f"❌ Error: {str(e)}")
+        click.echo(f"[FAIL] Error: {str(e)}")
         logging.error(f"Batch analysis error: {str(e)}")
 
 @cli.group()
@@ -776,7 +776,7 @@ def cve():
 @click.option('--source', type=click.Choice(['nvd', 'cve-project', 'both']), default='nvd', help='Data source')
 def bulk_import(start_year, end_year, source):
     """Import all CVEs from start_year to end_year."""
-    click.echo(f"🔄 Starting bulk import from {start_year} to {end_year or 'now'}...")
+    click.echo(f"[MONITOR] Starting bulk import from {start_year} to {end_year or 'now'}...")
     click.echo(f"📡 Source: {source}")
     click.echo("⏳ This will take a while. Please be patient...\n")
     
@@ -790,7 +790,7 @@ def bulk_import(start_year, end_year, source):
         nvd_stats = scraper.bulk_import_cves(start_year=start_year, end_year=end_year)
         results['nvd'] = nvd_stats
         
-        click.echo(f"\n✅ NVD Import Complete:")
+        click.echo(f"\n[PASS] NVD Import Complete:")
         click.echo(f"   Years processed: {nvd_stats['years_processed']}")
         click.echo(f"   Total CVEs found: {nvd_stats['total_cves_found']:,}")
         click.echo(f"   New CVEs saved: {nvd_stats['total_cves_saved']:,}")
@@ -804,33 +804,33 @@ def bulk_import(start_year, end_year, source):
         cve_project_stats = scraper.bulk_import_cves(start_year=start_year, end_year=end_year)
         results['cve_project'] = cve_project_stats
         
-        click.echo(f"\n✅ CVE Project Import Complete:")
+        click.echo(f"\n[PASS] CVE Project Import Complete:")
         click.echo(f"   Years processed: {cve_project_stats['years_processed']}")
         click.echo(f"   Total CVEs found: {cve_project_stats['total_cves_found']:,}")
         click.echo(f"   New CVEs saved: {cve_project_stats['total_cves_saved']:,}")
         click.echo(f"   CVEs updated: {cve_project_stats['total_cves_updated']:,}")
     
     click.echo("\n" + "=" * 50)
-    click.echo("📊 BULK IMPORT SUMMARY")
+    click.echo("[INFO] BULK IMPORT SUMMARY")
     click.echo("=" * 50)
     
     total_saved = sum(r['total_cves_saved'] for r in results.values())
     total_updated = sum(r['total_cves_updated'] for r in results.values())
     
-    click.echo(f"✅ Total new CVEs: {total_saved:,}")
-    click.echo(f"🔄 Total updated CVEs: {total_updated:,}")
-    click.echo(f"📊 Grand total: {total_saved + total_updated:,}")
+    click.echo(f"[PASS] Total new CVEs: {total_saved:,}")
+    click.echo(f"[MONITOR] Total updated CVEs: {total_updated:,}")
+    click.echo(f"[INFO] Grand total: {total_saved + total_updated:,}")
 
 @cve.command()
 @click.option('--hours', default=24, help='Hours to look back')
 def check_new(hours):
     """Check for new CVEs."""
-    click.echo(f"🔍 Checking for CVEs from last {hours} hours...")
+    click.echo(f"[SEARCH] Checking for CVEs from last {hours} hours...")
     
     monitor = CVEMonitor()
     stats = monitor.check_for_new_cves(lookback_hours=hours)
     
-    click.echo(f"\n📊 Results:")
+    click.echo(f"\n[INFO] Results:")
     click.echo(f"   Total new: {stats['total_cves_new']:,}")
     click.echo(f"   Total updated: {stats['total_cves_updated']:,}")
     
@@ -841,7 +841,7 @@ def check_new(hours):
             click.echo(f"      New: {source_stats['cves_new']:,}")
             click.echo(f"      Updated: {source_stats['cves_updated']:,}")
         else:
-            click.echo(f"\n   {source.upper()}: ❌ ERROR - {source_stats.get('error')}")
+            click.echo(f"\n   {source.upper()}: [FAIL] ERROR - {source_stats.get('error')}")
 
 @cve.command()
 @click.option('--interval', default=60, help='Minutes between checks')
@@ -849,26 +849,26 @@ def check_new(hours):
 def monitor(interval, once):
     """Start CVE monitoring service."""
     if once:
-        click.echo("🔄 Running monitor once...")
+        click.echo("[MONITOR] Running monitor once...")
     else:
-        click.echo(f"🔄 Starting CVE monitor (interval: {interval} minutes)...")
-        click.echo("⏸️  Press Ctrl+C to stop")
+        click.echo(f"[MONITOR] Starting CVE monitor (interval: {interval} minutes)...")
+        click.echo("[PAUSE]  Press Ctrl+C to stop")
     
     monitor = CVEMonitor()
     monitor.start_monitoring(interval_minutes=interval, run_once=once)
     
-    click.echo("✅ Monitor complete!")
+    click.echo("[PASS] Monitor complete!")
 
 @cve.command()
 def compare():
     """Compare local database with CVE sources."""
-    click.echo("🔍 Comparing database with CVE sources...\n")
+    click.echo("[SEARCH] Comparing database with CVE sources...\n")
     
     monitor = CVEMonitor()
     stats = monitor.compare_with_database()
     
     click.echo("=" * 50)
-    click.echo("📊 DATABASE STATISTICS")
+    click.echo("[INFO] DATABASE STATISTICS")
     click.echo("=" * 50)
     click.echo(f"Total CVEs: {stats['total_cves_local']:,}")
     click.echo(f"Oldest CVE: {stats['oldest_cve_date']}")
@@ -891,12 +891,12 @@ def backfill(start_date, end_date):
     start = datetime.strptime(start_date, '%Y-%m-%d')
     end = datetime.strptime(end_date, '%Y-%m-%d')
     
-    click.echo(f"🔄 Backfilling CVEs from {start_date} to {end_date}...")
+    click.echo(f"[MONITOR] Backfilling CVEs from {start_date} to {end_date}...")
     
     monitor = CVEMonitor()
     stats = monitor.backfill_missing_cves(start, end)
     
-    click.echo("\n✅ Backfill complete:")
+    click.echo("\n[PASS] Backfill complete:")
     for source, source_stats in stats['sources'].items():
         if 'error' not in source_stats:
             click.echo(f"\n   {source.upper()}:")
@@ -904,7 +904,7 @@ def backfill(start_date, end_date):
             click.echo(f"      New: {source_stats['cves_new']:,}")
             click.echo(f"      Updated: {source_stats['cves_updated']:,}")
         else:
-            click.echo(f"\n   {source.upper()}: ❌ {source_stats['error']}")
+            click.echo(f"\n   {source.upper()}: [FAIL] {source_stats['error']}")
 
 @cli.command()
 def version():

@@ -73,7 +73,7 @@ class AIAnalyzer:
                 low_cpu_mem_usage=True
             )
             self.model_provider = "huggingface"
-            logger.info("✅ Hugging Face model loaded")
+            logger.info("[PASS] Hugging Face model loaded")
         except ImportError:
             logger.warning("transformers not installed. Install with: pip install transformers torch")
         except Exception as e:
@@ -88,7 +88,7 @@ class AIAnalyzer:
                 raise ValueError("OPENAI_API_KEY not set")
             self.model = os.getenv("OPENAI_MODEL", "gpt-4")
             self.model_provider = "openai"
-            logger.info(f"✅ OpenAI API configured (model: {self.model})")
+            logger.info(f"[PASS] OpenAI API configured (model: {self.model})")
         except ImportError:
             logger.warning("openai not installed. Install with: pip install openai")
         except Exception as e:
@@ -104,7 +104,7 @@ class AIAnalyzer:
             self.client = anthropic.Anthropic(api_key=api_key)
             self.model = os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229")
             self.model_provider = "anthropic"
-            logger.info(f"✅ Anthropic API configured (model: {self.model})")
+            logger.info(f"[PASS] Anthropic API configured (model: {self.model})")
         except ImportError:
             logger.warning("anthropic not installed. Install with: pip install anthropic")
         except Exception as e:
@@ -121,7 +121,7 @@ class AIAnalyzer:
         Returns:
             List of repository dictionaries
         """
-        logger.info(f"🔍 AI-powered search for {cve_id}")
+        logger.info(f"[SEARCH] AI-powered search for {cve_id}")
         
         # Step 1: AI generates intelligent search queries
         queries = await self._generate_search_queries(cve_id)
@@ -203,7 +203,7 @@ Each query should be optimized for GitHub's search syntax."""
         Returns:
             Analysis results dictionary
         """
-        logger.info(f"🤖 AI analyzing repository: {repo_url}")
+        logger.info(f"[AI] AI analyzing repository: {repo_url}")
         
         try:
             # Parse repo URL
