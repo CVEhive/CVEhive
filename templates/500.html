@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - CVEhive{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-page">
+                <h1 class="display-1 text-danger">500</h1>
+                <h2 class="mb-4">Internal Server Error</h2>
+                <p class="lead mb-4">
+                    Something went wrong on our end. We're working to fix it.
+                </p>
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle fa-5x text-danger"></i>
+                </div>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('frontend.index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                    <a href="javascript:location.reload()" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Try Again
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <small class="text-muted">
+                        If this error persists, please contact the administrator.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

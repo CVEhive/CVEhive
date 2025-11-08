@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - CVEhive{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-bar"></i>
+                Database Statistics
+            </h1>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ "{:,}".format(stats.total_cves) }}</h4>
+                            <p class="card-text">Total CVEs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bug fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ "{:,}".format(stats.total_exploits) }}</h4>
+                            <p class="card-text">Total Exploits</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-code fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ "{:,}".format(stats.validated_exploits) }}</h4>
+                            <p class="card-text">Validated Exploits</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ "{:.1f}%".format(stats.validation_rate) }}</h4>
+                            <p class="card-text">Validation Rate</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-percentage fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Severity Breakdown -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        CVE Severity Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="severityChart" height="200"></canvas>
+                    <div class="mt-3">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <span class="badge badge-danger badge-lg">Critical</span>
+                                <div>{{ "{:,}".format(stats.critical_cves) }}</div>
+                            </div>
+                            <div class="col-3">
+                                <span class="badge badge-warning badge-lg">High</span>
+                                <div>{{ "{:,}".format(stats.high_cves) }}</div>
+                            </div>
+                            <div class="col-3">
+                                <span class="badge badge-info badge-lg">Medium</span>
+                                <div>{{ "{:,}".format(stats.medium_cves) }}</div>
+                            </div>
+                            <div class="col-3">
+                                <span class="badge badge-secondary badge-lg">Low</span>
+                                <div>{{ "{:,}".format(stats.total_cves - stats.critical_cves - stats.high_cves - stats.medium_cves) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exploit Sources -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-database"></i>
+                        Exploit Sources
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="sourcesChart" height="200"></canvas>
+                    <div class="mt-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <span class="badge badge-dark badge-lg">GitHub</span>
+                                <div>{{ "{:,}".format(stats.github_exploits) }}</div>
+                            </div>
+                            <div class="col-4">
+                                <span class="badge badge-primary badge-lg">ExploitDB</span>
+                                <div>{{ "{:,}".format(stats.exploitdb_exploits) }}</div>
+                            </div>
+                            <div class="col-4">
+                                <span class="badge badge-secondary badge-lg">Other</span>
+                                <div>{{ "{:,}".format(stats.total_exploits - stats.github_exploits - stats.exploitdb_exploits) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock"></i>
+                        Recent Activity (Last 30 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-bug text-primary fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="mb-0">{{ "{:,}".format(stats.recent_cves) }}</h4>
+                                    <p class="text-muted mb-0">New CVEs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-code text-success fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="mb-0">{{ "{:,}".format(stats.recent_exploits) }}</h4>
+                                    <p class="text-muted mb-0">New Exploits</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Progress -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks"></i>
+                        Validation Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ stats.validation_rate }}%"
+                             aria-valuenow="{{ stats.validation_rate }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ "{:.1f}%".format(stats.validation_rate) }} Validated
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h5>{{ "{:,}".format(stats.total_validations) }}</h5>
+                            <p class="text-muted">Total Validations</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>{{ "{:,}".format(stats.validated_exploits) }}</h5>
+                            <p class="text-muted">Successful</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>{{ "{:,}".format(stats.total_validations - stats.validated_exploits) }}</h5>
+                            <p class="text-muted">Failed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Severity Chart
+const severityCtx = document.getElementById('severityChart').getContext('2d');
+new Chart(severityCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            data: [
+                {{ stats.critical_cves }},
+                {{ stats.high_cves }},
+                {{ stats.medium_cves }},
+                {{ stats.total_cves - stats.critical_cves - stats.high_cves - stats.medium_cves }}
+            ],
+            backgroundColor: [
+                '#dc3545',
+                '#ffc107',
+                '#17a2b8',
+                '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+            display: false
+        }
+    }
+});
+
+// Sources Chart
+const sourcesCtx = document.getElementById('sourcesChart').getContext('2d');
+new Chart(sourcesCtx, {
+    type: 'pie',
+    data: {
+        labels: ['GitHub', 'ExploitDB', 'Other'],
+        datasets: [{
+            data: [
+                {{ stats.github_exploits }},
+                {{ stats.exploitdb_exploits }},
+                {{ stats.total_exploits - stats.github_exploits - stats.exploitdb_exploits }}
+            ],
+            backgroundColor: [
+                '#343a40',
+                '#007bff',
+                '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+            display: false
+        }
+    }
+});
+</script>
+{% endblock %} 

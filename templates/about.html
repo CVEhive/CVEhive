@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}About - CVEhive{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-5">
+                <i class="fas fa-info-circle"></i>
+                About CVEhive
+            </h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">What is CVEhive? 🔍</h2>
+                    <p class="card-text">
+                        CVEhive is a modern CVE search engine that automatically discovers, validates, and provides up-to-date proof-of-concept exploits for security researchers. Our platform aggregates vulnerability data from multiple sources and validates exploit code in sandboxed environments to ensure reliability.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Key Features 🎯</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-search text-primary"></i>
+                                    <strong> Google-like Search Interface</strong><br>
+                                    <small class="text-muted">Clean, fast, and intuitive CVE search</small>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-sync-alt text-success"></i>
+                                    <strong> Real-time CVE Monitoring</strong><br>
+                                    <small class="text-muted">Continuously pulls latest CVEs from multiple sources</small>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-robot text-info"></i>
+                                    <strong> Automated Exploit Discovery</strong><br>
+                                    <small class="text-muted">Searches GitHub and ExploitDB for exploit code</small>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-warning"></i>
+                                    <strong> Exploit Validation</strong><br>
+                                    <small class="text-muted">Tests and validates exploit code in sandboxed environments</small>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-filter text-danger"></i>
+                                    <strong> Advanced Filtering</strong><br>
+                                    <small class="text-muted">Search by severity, vendor, date, exploit availability</small>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-code text-secondary"></i>
+                                    <strong> RESTful API</strong><br>
+                                    <small class="text-muted">Programmatic access for security tools and researchers</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Data Sources 📊</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-shield-alt text-primary fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">NVD (NIST)</h5>
+                                    <p class="text-muted mb-0">Official CVE database</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fab fa-github text-dark fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">GitHub</h5>
+                                    <p class="text-muted mb-0">Exploit code repositories</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-database text-success fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">ExploitDB</h5>
+                                    <p class="text-muted mb-0">Known exploit database</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-link text-info fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">CVE Details</h5>
+                                    <p class="text-muted mb-0">Additional metadata and references</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Architecture 🏗️</h2>
+                    <div class="text-center mb-4">
+                        <pre class="text-start bg-light p-3 rounded">
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API   │    │   Scrapers      │
+│   (Flask)       │◄──►│   (Flask)       │◄──►│   (Celery)      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │   PostgreSQL    │    │   Redis Queue   │
+                       │   Database      │    │   & Cache       │
+                       └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   Docker        │
+                       │   Sandbox       │
+                       └─────────────────┘
+                        </pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">API Documentation 🔧</h2>
+                    <p class="card-text">
+                        CVEhive provides a comprehensive RESTful API for programmatic access to vulnerability data:
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>CVE Endpoints</h5>
+                            <ul class="list-unstyled">
+                                <li><code>GET /api/cves</code> - List CVEs</li>
+                                <li><code>GET /api/cves/{id}</code> - Get CVE details</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Exploit Endpoints</h5>
+                            <ul class="list-unstyled">
+                                <li><code>GET /api/exploits</code> - List exploits</li>
+                                <li><code>GET /api/exploits/{id}</code> - Get exploit details</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Search Endpoints</h5>
+                            <ul class="list-unstyled">
+                                <li><code>GET /api/search</code> - Universal search</li>
+                                <li><code>GET /api/stats</code> - Database statistics</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Health Check</h5>
+                            <ul class="list-unstyled">
+                                <li><code>GET /api/health</code> - API status</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">⚠️ Disclaimer</h4>
+                <p>
+                    This tool is for educational and authorized security research only. Users are responsible for complying with applicable laws and regulations. CVEhive does not endorse or encourage malicious use of the provided information.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    Always ensure you have proper authorization before testing exploits against any systems.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title">Contributing 🤝</h2>
+                    <p class="card-text">
+                        CVEhive is an open-source project. We welcome contributions from the security research community.
+                    </p>
+                    <a href="https://github.com/yourusername/cvehive" class="btn btn-primary">
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

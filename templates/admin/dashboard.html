@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - CVEhive{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 5px solid;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card.critical { border-left-color: #e74c3c; }
+    .stat-card.high { border-left-color: #f39c12; }
+    .stat-card.medium { border-left-color: #3498db; }
+    .stat-card.success { border-left-color: #27ae60; }
+    
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 1.1em;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .action-btn.sync {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    }
+    
+    .action-btn.validate {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.4em;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .cve-item, .validation-item {
+        padding: 15px;
+        border: 1px solid #ecf0f1;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .cve-item:hover, .validation-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .cve-id {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .severity-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        color: white;
+        margin-left: 10px;
+    }
+    
+    .severity-critical { background-color: #e74c3c; }
+    .severity-high { background-color: #f39c12; }
+    .severity-medium { background-color: #3498db; }
+    .severity-low { background-color: #27ae60; }
+    
+    .validation-status {
+        font-size: 0.9em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        color: white;
+    }
+    
+    .status-validated { background-color: #27ae60; }
+    .status-pending { background-color: #f39c12; }
+    .status-failed { background-color: #e74c3c; }
+    
+    .no-data {
+        text-align: center;
+        color: #7f8c8d;
+        font-style: italic;
+        padding: 30px;
+    }
+    
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> CVEhive Admin Dashboard</h1>
+        <p>Comprehensive CVE and PoC Management Interface</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card medium">
+            <div class="stat-number">{{ stats.get('total_cves', 0) }}</div>
+            <div class="stat-label">Total CVEs</div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-number">{{ stats.get('total_exploits', 0) }}</div>
+            <div class="stat-label">Total Exploits</div>
+        </div>
+        
+        <div class="stat-card critical">
+            <div class="stat-number">{{ stats.get('validated_exploits', 0) }}</div>
+            <div class="stat-label">Validated PoCs</div>
+        </div>
+        
+        <div class="stat-card high">
+            <div class="stat-number">{{ stats.get('pending_validation', 0) }}</div>
+            <div class="stat-label">Pending Validation</div>
+        </div>
+        
+        <div class="stat-card medium">
+            <div class="stat-number">{{ stats.get('cves_with_exploits', 0) }}</div>
+            <div class="stat-label">CVEs with PoCs</div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-number">{{ stats.get('recent_validations', 0) }}</div>
+            <div class="stat-label">Recent Validations</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="action-buttons">
+        <a href="{{ url_for('admin.cve_management') }}" class="action-btn">
+            <i class="fas fa-bug"></i> Manage CVEs
+        </a>
+        
+        <a href="{{ url_for('admin.exploit_management') }}" class="action-btn">
+            <i class="fas fa-code"></i> Manage Exploits
+        </a>
+        
+        <a href="{{ url_for('admin.repository_monitor') }}" class="action-btn sync">
+            <i class="fas fa-sync-alt"></i> Repository Monitor
+        </a>
+        
+        <a href="{{ url_for('admin.search_missing_pocs') }}" class="action-btn validate">
+            <i class="fas fa-search"></i> Find Missing PoCs
+        </a>
+        
+        <button onclick="syncTrickest()" class="action-btn sync">
+            <i class="fas fa-download"></i> Sync Trickest
+        </button>
+        
+        <button onclick="bulkValidate()" class="action-btn validate">
+            <i class="fas fa-check-double"></i> Bulk Validate
+        </button>
+    </div>
+    
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- CVEs Without Exploits -->
+        <div class="content-section">
+            <h3 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i> High Priority CVEs (No PoCs)
+            </h3>
+            
+            {% if priority_cves %}
+                {% for cve in priority_cves %}
+                <div class="cve-item">
+                    <div class="cve-id">{{ cve.cve_id }}</div>
+                    <span class="severity-badge severity-{{ cve.severity.lower() }}">{{ cve.severity }}</span>
+                    <div style="margin-top: 8px; color: #7f8c8d; font-size: 0.9em;">
+                        {{ cve.summary[:100] }}{% if cve.summary|length > 100 %}...{% endif %}
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.8em; color: #95a5a6;">
+                        Published: {{ cve.published_date.strftime('%Y-%m-%d') if cve.published_date }}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="{{ url_for('admin.search_missing_pocs') }}" class="action-btn" style="display: inline-block; padding: 10px 20px;">
+                        View All Missing PoCs
+                    </a>
+                </div>
+            {% else %}
+                <div class="no-data">
+                    <i class="fas fa-check-circle" style="font-size: 2em; margin-bottom: 10px;"></i>
+                    <div>No high priority CVEs without PoCs found!</div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Recent Validation Results -->
+        <div class="content-section">
+            <h3 class="section-title">
+                <i class="fas fa-clipboard-check"></i> Recent Validation Results
+            </h3>
+            
+            {% if recent_validations %}
+                {% for validation in recent_validations %}
+                <div class="validation-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="cve-id">{{ validation.exploit.cve_id if validation.exploit else 'Unknown' }}</div>
+                            <div style="font-size: 0.9em; color: #7f8c8d;">
+                                {{ validation.validation_date.strftime('%Y-%m-%d %H:%M') if validation.validation_date }}
+                            </div>
+                        </div>
+                        <span class="validation-status status-{{ 'validated' if validation.success else 'failed' }}">
+                            {{ 'PASSED' if validation.success else 'FAILED' }}
+                        </span>
+                    </div>
+                    {% if validation.error_message %}
+                    <div style="margin-top: 5px; font-size: 0.8em; color: #e74c3c;">
+                        {{ validation.error_message[:80] }}{% if validation.error_message|length > 80 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="{{ url_for('admin.exploit_management') }}?validation_status=validated" class="action-btn" style="display: inline-block; padding: 10px 20px;">
+                        View All Validations
+                    </a>
+                </div>
+            {% else %}
+                <div class="no-data">
+                    <i class="fas fa-clock" style="font-size: 2em; margin-bottom: 10px;"></i>
+                    <div>No recent validation results</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function syncTrickest() {
+    if (confirm('Start syncing with Trickest repository? This may take a few minutes.')) {
+        fetch('/admin/sync-trickest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Sync initiated successfully');
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error initiating sync');
+        });
+    }
+}
+
+function bulkValidate() {
+    if (confirm('Start bulk validation of pending exploits? This will validate all pending PoCs.')) {
+        // Get pending exploits (simplified - in reality you'd select specific ones)
+        fetch('/admin/bulk-validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                exploit_ids: [] // Would be populated with selected IDs
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Bulk validation completed');
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error during bulk validation');
+        });
+    }
+}
+
+// Auto-refresh stats every 30 seconds
+setInterval(function() {
+    fetch('/admin/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update stat numbers
+            document.querySelectorAll('.stat-number').forEach((el, index) => {
+                const stats = [
+                    data.total_cves || 0,
+                    data.total_exploits || 0,
+                    data.validated_exploits || 0,
+                    data.pending_validation || 0,
+                    data.cves_with_exploits || 0,
+                    data.recent_validations || 0
+                ];
+                if (stats[index] !== undefined) {
+                    el.textContent = stats[index];
+                }
+            });
+        })
+        .catch(error => console.error('Error updating stats:', error));
+}, 30000);
+</script>
+{% endblock %} 

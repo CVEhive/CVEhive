@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results for "{{ query }}" - CVEhive{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 20px 0;
+    }
+    
+    .search-stats {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    .result-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: box-shadow 0.2s;
+    }
+    
+    .result-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .cve-id {
+        font-weight: bold;
+        color: #dc3545;
+        font-size: 18px;
+    }
+    
+    .severity-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .severity-critical { background: #dc3545; color: white; }
+    .severity-high { background: #fd7e14; color: white; }
+    .severity-medium { background: #ffc107; color: black; }
+    .severity-low { background: #28a745; color: white; }
+    .severity-none { background: #6c757d; color: white; }
+    
+    .exploit-indicator {
+        background: #e74c3c;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        margin-left: 10px;
+    }
+    
+    .filters-section {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <form method="GET" action="{{ url_for('search') }}" class="d-flex">
+                    <input type="text" name="q" value="{{ query }}" class="form-control me-2" placeholder="Search CVEs...">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Filters -->
+            <div class="filters-section">
+                <h5>Filters</h5>
+                <form method="GET" action="{{ url_for('search') }}">
+                    <input type="hidden" name="q" value="{{ query }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Severity</label>
+                        <select name="severity" class="form-select">
+                            <option value="">All Severities</option>
+                            <option value="critical" {% if filters.severity == 'critical' %}selected{% endif %}>Critical</option>
+                            <option value="high" {% if filters.severity == 'high' %}selected{% endif %}>High</option>
+                            <option value="medium" {% if filters.severity == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="low" {% if filters.severity == 'low' %}selected{% endif %}>Low</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Has Exploit</label>
+                        <select name="has_exploit" class="form-select">
+                            <option value="">All CVEs</option>
+                            <option value="yes" {% if filters.has_exploit == 'yes' %}selected{% endif %}>With Exploits</option>
+                            <option value="no" {% if filters.has_exploit == 'no' %}selected{% endif %}>Without Exploits</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Source</label>
+                        <select name="source" class="form-select">
+                            <option value="">All Sources</option>
+                            <option value="github" {% if filters.source == 'github' %}selected{% endif %}>GitHub</option>
+                            <option value="exploitdb" {% if filters.source == 'exploitdb' %}selected{% endif %}>ExploitDB</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Apply Filters</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            {% if results and results.items %}
+                <div class="search-stats">
+                    About {{ results.total }} results ({{ "%.2f"|format(results.search_time or 0) }} seconds)
+                </div>
+                
+                {% for item in results.items %}
+                    <div class="result-item">
+                        {% if item.__class__.__name__ == 'CVE' %}
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <a href="{{ url_for('cve_detail', cve_id=item.cve_id) }}" class="cve-id text-decoration-none">
+                                    {{ item.cve_id }}
+                                </a>
+                                <div>
+                                    <span class="severity-badge severity-{{ item.severity.lower() if item.severity else 'none' }}">
+                                        {{ item.severity or 'Unknown' }}
+                                    </span>
+                                    {% if item.exploit_count > 0 %}
+                                        <span class="exploit-indicator">{{ item.exploit_count }} Exploit{{ 's' if item.exploit_count != 1 else '' }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <p class="mb-2">{{ item.description[:300] }}{% if item.description|length > 300 %}...{% endif %}</p>
+                            
+                            <div class="text-muted small">
+                                <strong>CVSS:</strong> {{ item.cvss_score or 'N/A' }} |
+                                <strong>Published:</strong> {{ item.published_date.strftime('%Y-%m-%d') if item.published_date else 'Unknown' }} |
+                                <strong>Vendor:</strong> {{ item.vendor or 'Unknown' }}
+                            </div>
+                            
+                        {% elif item.__class__.__name__ == 'Exploit' %}
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <a href="{{ url_for('exploit_detail', exploit_id=item.id) }}" class="text-decoration-none">
+                                    <strong>{{ item.title }}</strong>
+                                </a>
+                                <div>
+                                    <span class="badge bg-info">{{ item.source.title() }}</span>
+                                    {% if item.validation_status == 'validated' %}
+                                        <span class="badge bg-success">Validated</span>
+                                    {% elif item.validation_status == 'failed' %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <p class="mb-2">{{ item.description[:300] if item.description else 'No description available' }}{% if item.description and item.description|length > 300 %}...{% endif %}</p>
+                            
+                            <div class="text-muted small">
+                                <strong>CVE:</strong> 
+                                {% if item.cve %}
+                                    <a href="{{ url_for('cve_detail', cve_id=item.cve.cve_id) }}">{{ item.cve.cve_id }}</a>
+                                {% else %}
+                                    Unknown
+                                {% endif %} |
+                                <strong>Language:</strong> {{ item.language or 'Unknown' }} |
+                                <strong>Quality:</strong> {{ item.quality_score or 'N/A' }}/10
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if results.pages > 1 %}
+                    <nav aria-label="Search results pagination">
+                        <ul class="pagination">
+                            {% if results.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('search', q=query, page=results.prev_num, severity=filters.severity, has_exploit=filters.has_exploit, source=filters.source) }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in results.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != results.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('search', q=query, page=page_num, severity=filters.severity, has_exploit=filters.has_exploit, source=filters.source) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if results.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('search', q=query, page=results.next_num, severity=filters.severity, has_exploit=filters.has_exploit, source=filters.source) }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <h4>No results found for "{{ query }}"</h4>
+                    <p class="text-muted">Try different keywords or adjust your filters.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Search</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

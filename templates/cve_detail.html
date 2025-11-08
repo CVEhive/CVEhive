@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cve.cve_id }} - CVEhive{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cve-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 0;
+    }
+    
+    .cve-id {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .severity-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-right: 10px;
+    }
+    
+    .severity-critical { background: #dc3545; }
+    .severity-high { background: #fd7e14; }
+    .severity-medium { background: #ffc107; color: black; }
+    .severity-low { background: #28a745; }
+    .severity-none { background: #6c757d; }
+    
+    .info-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .cvss-score {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #dc3545;
+    }
+    
+    .exploit-card {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: box-shadow 0.2s;
+    }
+    
+    .exploit-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .validation-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .status-validated { background: #d4edda; color: #155724; }
+    .status-failed { background: #f8d7da; color: #721c24; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    
+    .references-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .timeline-item {
+        border-left: 3px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cve-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="cve-id">{{ cve.cve_id }}</div>
+                <div class="mb-3">
+                    <span class="severity-badge severity-{{ cve.severity.lower() if cve.severity else 'none' }}">
+                        {{ cve.severity or 'Unknown' }} Severity
+                    </span>
+                    {% if exploits %}
+                        <span class="badge bg-danger">{{ exploits|length }} Exploit{{ 's' if exploits|length != 1 else '' }} Available</span>
+                    {% endif %}
+                </div>
+                <p class="lead">{{ cve.description or 'No description available' }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if cve.cvss_score %}
+                    <div class="cvss-score">{{ cve.cvss_score }}</div>
+                    <div>CVSS Score</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- CVE Details -->
+            <div class="info-card">
+                <h4>CVE Details</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>CVE ID:</strong> {{ cve.cve_id }}</p>
+                        <p><strong>Published:</strong> {{ cve.published_date.strftime('%Y-%m-%d %H:%M UTC') if cve.published_date else 'Unknown' }}</p>
+                        <p><strong>Modified:</strong> {{ cve.modified_date.strftime('%Y-%m-%d %H:%M UTC') if cve.modified_date else 'Unknown' }}</p>
+                        <p><strong>Vendor:</strong> {{ cve.vendor or 'Unknown' }}</p>
+                        <p><strong>Product:</strong> {{ cve.product or 'Unknown' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>CVSS Score:</strong> {{ cve.cvss_score or 'N/A' }}</p>
+                        <p><strong>CVSS Vector:</strong> {{ cve.cvss_vector or 'N/A' }}</p>
+                        <p><strong>CWE ID:</strong> {{ cve.cwe_id or 'N/A' }}</p>
+                        <p><strong>Attack Vector:</strong> {{ cve.attack_vector or 'Unknown' }}</p>
+                        <p><strong>Attack Complexity:</strong> {{ cve.attack_complexity or 'Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Exploits Section -->
+            {% if exploits %}
+                <div class="info-card">
+                    <h4>Available Exploits ({{ exploits|length }})</h4>
+                    {% for exploit in exploits %}
+                        <div class="exploit-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5>
+                                    <a href="{{ url_for('exploit_detail', exploit_id=exploit.id) }}" class="text-decoration-none">
+                                        {{ exploit.title }}
+                                    </a>
+                                </h5>
+                                <div>
+                                    <span class="badge bg-info">{{ exploit.source.title() }}</span>
+                                    <span class="validation-status status-{{ exploit.validation_status or 'pending' }}">
+                                        {{ exploit.validation_status.title() if exploit.validation_status else 'Pending' }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if exploit.description %}
+                                <p class="mb-2">{{ exploit.description[:200] }}{% if exploit.description|length > 200 %}...{% endif %}</p>
+                            {% endif %}
+                            
+                            <div class="row text-muted small">
+                                <div class="col-md-6">
+                                    <strong>Language:</strong> {{ exploit.language or 'Unknown' }}<br>
+                                    <strong>Quality Score:</strong> {{ exploit.quality_score or 'N/A' }}/10<br>
+                                    <strong>Author:</strong> {{ exploit.author or 'Unknown' }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Published:</strong> {{ exploit.published_date.strftime('%Y-%m-%d') if exploit.published_date else 'Unknown' }}<br>
+                                    <strong>Platform:</strong> {{ exploit.platform or 'Unknown' }}<br>
+                                    {% if exploit.url %}
+                                        <strong>Source:</strong> <a href="{{ exploit.url }}" target="_blank" rel="noopener">View Original</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="info-card text-center">
+                    <h4>No Exploits Found</h4>
+                    <p class="text-muted">No public exploits have been discovered for this CVE yet.</p>
+                </div>
+            {% endif %}
+            
+            <!-- References -->
+            {% if cve.references %}
+                <div class="info-card">
+                    <h4>References</h4>
+                    <div class="references-list">
+                        {% for ref in cve.references.split(',') if ref.strip() %}
+                            <p><a href="{{ ref.strip() }}" target="_blank" rel="noopener">{{ ref.strip() }}</a></p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <h5>Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('search', q=cve.cve_id) }}" class="btn btn-outline-primary">Search Related</a>
+                    {% if cve.vendor %}
+                        <a href="{{ url_for('search', q=cve.vendor) }}" class="btn btn-outline-secondary">More from {{ cve.vendor }}</a>
+                    {% endif %}
+                    {% if cve.cwe_id %}
+                        <a href="{{ url_for('search', q=cve.cwe_id) }}" class="btn btn-outline-info">Similar CWE</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="info-card">
+                <h5>Timeline</h5>
+                {% if cve.published_date %}
+                    <div class="timeline-item">
+                        <strong>Published</strong><br>
+                        <small class="text-muted">{{ cve.published_date.strftime('%Y-%m-%d %H:%M UTC') }}</small>
+                    </div>
+                {% endif %}
+                {% if cve.modified_date and cve.modified_date != cve.published_date %}
+                    <div class="timeline-item">
+                        <strong>Last Modified</strong><br>
+                        <small class="text-muted">{{ cve.modified_date.strftime('%Y-%m-%d %H:%M UTC') }}</small>
+                    </div>
+                {% endif %}
+                {% if exploits %}
+                    {% for exploit in exploits[:3] %}
+                        <div class="timeline-item">
+                            <strong>Exploit Found</strong><br>
+                            <small class="text-muted">{{ exploit.published_date.strftime('%Y-%m-%d') if exploit.published_date else 'Unknown date' }} - {{ exploit.source.title() }}</small>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- Statistics -->
+            <div class="info-card">
+                <h5>Statistics</h5>
+                <p><strong>Exploits Found:</strong> {{ exploits|length }}</p>
+                <p><strong>Validated Exploits:</strong> {{ exploits|selectattr('validation_status', 'equalto', 'validated')|list|length }}</p>
+                <p><strong>Failed Validations:</strong> {{ exploits|selectattr('validation_status', 'equalto', 'failed')|list|length }}</p>
+                {% if exploits %}
+                    <p><strong>Avg Quality Score:</strong> {{ "%.1f"|format((exploits|map(attribute='quality_score')|select|list|sum) / (exploits|map(attribute='quality_score')|select|list|length)) if exploits|map(attribute='quality_score')|select|list else 'N/A' }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4 mb-4">
+    <div class="text-center">
+        <a href="{{ url_for('search', q='') }}" class="btn btn-primary">Back to Search</a>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">Go Back</a>
+    </div>
+</div>
+{% endblock %} 

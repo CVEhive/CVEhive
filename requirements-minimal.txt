@@ -1,0 +1,29 @@
+# Minimal Requirements for CVE Import & Monitoring Testing
+# Install with: pip install -r requirements-minimal.txt
+
+# Core Web Framework (for Flask app initialization)
+flask==3.0.0
+flask-sqlalchemy==3.1.1
+
+# Database (Required for CVE storage)
+sqlalchemy==2.0.23
+
+# HTTP Requests (Required for API calls)
+requests==2.31.0
+
+# Date/Time handling (Required for date parsing)
+python-dateutil==2.8.2
+
+# Environment variables
+python-dotenv==1.0.0
+
+# CLI Framework (Required for cli.py commands)
+click==8.1.7
+
+# Optional: Background Tasks (Only if testing Celery)
+# celery==5.3.4
+# redis==5.0.1
+
+# Optional: PostgreSQL support (Use if not using SQLite)
+# psycopg2-binary==2.9.9
+

@@ -1,0 +1,66 @@
+# Web Framework
+flask==3.0.0
+flask-sqlalchemy==3.1.1
+fastapi>=0.115.0  # Updated for MCP compatibility
+uvicorn>=0.31.0  # Updated for MCP compatibility
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9
+redis==5.0.1
+
+# Background Tasks
+celery==5.3.4
+
+# HTTP Requests & Scraping
+requests==2.31.0
+beautifulsoup4==4.12.2
+selenium==4.15.2
+aiohttp==3.9.1
+
+# Data Processing
+pandas==2.1.4
+python-dateutil==2.8.2
+feedparser==6.0.10
+
+# Security & Validation
+docker==6.1.3
+paramiko==3.3.1
+
+# API Integration
+pygithub==2.1.1
+python-dotenv==1.0.0
+
+# Frontend
+wtforms==3.1.1
+flask-wtf==1.2.1
+
+# Utilities
+schedule==1.2.0
+python-crontab==3.0.0
+rich==13.7.0
+click==8.1.7
+
+# MCP (Model Context Protocol) - Required for GitHub integration
+mcp>=0.1.0  # GitHub MCP server client
+
+# AI/ML (Required for AI analyzer - choose one provider)
+# Option 1: Hugging Face (Open Source)
+transformers>=4.35.0
+torch>=2.1.0  # Required for Hugging Face models
+
+# Option 2: OpenAI API (Uncomment if using OpenAI)
+# openai>=1.3.0
+
+# Option 3: Anthropic Claude API (Uncomment if using Anthropic)
+# anthropic>=0.7.0
+
+# Static Analysis Tools (Optional - install separately)
+# semgrep  # Install: pip install semgrep
+# bandit  # Install: pip install bandit
+
+# Development
+pytest==7.4.3
+black==23.11.0
+flake8==6.1.0 

@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}CVEhive - CVE Search Engine{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="text-center py-5">
+        <div class="search-container mx-auto" style="margin-top: 100px;">
+            <!-- Logo -->
+            <h1 class="display-4 fw-bold mb-4">
+                🔍 <span style="color: var(--primary-color);">CVE</span><span style="color: var(--secondary-color);">hive</span>
+            </h1>
+            <p class="lead text-muted mb-5">Search CVEs with validated exploit code</p>
+
+            <!-- Search Form -->
+            <form action="{{ url_for('frontend.search') }}" method="GET" class="mb-4">
+                <div class="input-group mb-3">
+                    <input type="text" 
+                           name="q" 
+                           class="search-box" 
+                           placeholder="Search CVEs, vendors, products..."
+                           autocomplete="off"
+                           autofocus>
+                </div>
+                
+                <!-- Search Buttons -->
+                <div class="text-center">
+                    <button type="submit" class="search-btn">CVE Search</button>
+                    <button type="submit" class="search-btn" onclick="this.form.q.value += ' has:exploit'">I'm Feeling Lucky</button>
+                </div>
+            </form>
+
+            <!-- Quick Filters -->
+            <div class="row mt-4">
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ url_for('frontend.search', q='severity:critical') }}" class="btn btn-outline-danger btn-sm w-100">
+                        Critical CVEs
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ url_for('frontend.search', q='has:exploit') }}" class="btn btn-outline-success btn-sm w-100">
+                        With Exploits
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ url_for('frontend.search', q='2024') }}" class="btn btn-outline-primary btn-sm w-100">
+                        Recent CVEs
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ url_for('frontend.search', q='remote code execution') }}" class="btn btn-outline-warning btn-sm w-100">
+                        RCE Vulnerabilities
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mt-5">
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-number" id="total-cves">0</div>
+                <div>Total CVEs</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-number" id="total-exploits">0</div>
+                <div>Exploits Found</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-number" id="validated-exploits">0</div>
+                <div>Validated Exploits</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-number" id="validation-rate">0%</div>
+                <div>Validation Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Content -->
+    <div class="row mt-5">
+        <!-- Recent High-Severity CVEs -->
+        <div class="col-md-6">
+            <h3 class="h5 fw-bold mb-3">🚨 Recent Critical CVEs</h3>
+            <div id="recent-critical-cves">
+                <div class="placeholder-glow">
+                    <div class="placeholder col-12 mb-2"></div>
+                    <div class="placeholder col-8 mb-2"></div>
+                    <div class="placeholder col-10 mb-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Searches -->
+        <div class="col-md-6">
+            <h3 class="h5 fw-bold mb-3">🔥 Trending CVEs</h3>
+            <div id="popular-searches">
+                <div class="placeholder-glow">
+                    <div class="placeholder col-12 mb-2"></div>
+                    <div class="placeholder col-9 mb-2"></div>
+                    <div class="placeholder col-11 mb-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tips -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="filter-container">
+                <h4 class="h6 fw-bold mb-3">💡 Search Tips</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>CVE ID:</strong> <code>CVE-2024-1234</code></li>
+                            <li><strong>Vendor:</strong> <code>vendor:microsoft</code></li>
+                            <li><strong>Severity:</strong> <code>severity:critical</code></li>
+                            <li><strong>With exploits:</strong> <code>has:exploit</code></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>Product:</strong> <code>product:windows</code></li>
+                            <li><strong>Year:</strong> <code>2024</code></li>
+                            <li><strong>Type:</strong> <code>"remote code execution"</code></li>
+                            <li><strong>CVSS Score:</strong> <code>score:>8.0</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load statistics
+    loadStatistics();
+    
+    // Load recent content
+    loadRecentContent();
+    
+    // Add search suggestions
+    setupSearchSuggestions();
+});
+
+function loadStatistics() {
+    // Animate counters (placeholder implementation)
+    const stats = {
+        'total-cves': 125000,
+        'total-exploits': 15000,
+        'validated-exploits': 8500,
+        'validation-rate': 57
+    };
+    
+    Object.entries(stats).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            let current = 0;
+            const increment = value / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= value) {
+                    current = value;
+                    clearInterval(timer);
+                }
+                
+                if (id === 'validation-rate') {
+                    element.textContent = Math.floor(current) + '%';
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 30);
+        }
+    });
+}
+
+function loadRecentContent() {
+    // Simulate loading recent CVEs
+    const recentCvesHtml = `
+        <div class="list-group">
+            <a href="/cve/CVE-2024-0001" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">CVE-2024-0001</h6>
+                    <span class="severity-badge severity-critical">CRITICAL</span>
+                </div>
+                <p class="mb-1 text-muted">Remote code execution in popular framework</p>
+            </a>
+            <a href="/cve/CVE-2024-0002" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">CVE-2024-0002</h6>
+                    <span class="severity-badge severity-high">HIGH</span>
+                </div>
+                <p class="mb-1 text-muted">SQL injection vulnerability in web application</p>
+            </a>
+        </div>
+    `;
+    
+    const popularHtml = `
+        <div class="list-group">
+            <a href="/search?q=log4j" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <span>Log4j vulnerabilities</span>
+                    <span class="exploit-indicator">5 exploits</span>
+                </div>
+            </a>
+            <a href="/search?q=spring4shell" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <span>Spring4Shell RCE</span>
+                    <span class="exploit-indicator">3 exploits</span>
+                </div>
+            </a>
+            <a href="/search?q=ProxyShell" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <span>Exchange ProxyShell</span>
+                    <span class="exploit-indicator">8 exploits</span>
+                </div>
+            </a>
+        </div>
+    `;
+    
+    document.getElementById('recent-critical-cves').innerHTML = recentCvesHtml;
+    document.getElementById('popular-searches').innerHTML = popularHtml;
+}
+
+function setupSearchSuggestions() {
+    const searchBox = document.querySelector('.search-box');
+    let suggestionsDiv = null;
+    
+    searchBox.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+        
+        // Create suggestions dropdown
+        if (!suggestionsDiv) {
+            suggestionsDiv = document.createElement('div');
+            suggestionsDiv.className = 'search-suggestions';
+            suggestionsDiv.style.cssText = `
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid var(--border-color);
+                border-top: none;
+                border-radius: 0 0 24px 24px;
+                max-height: 300px;
+                overflow-y: auto;
+                z-index: 1000;
+                display: none;
+            `;
+            this.parentElement.style.position = 'relative';
+            this.parentElement.appendChild(suggestionsDiv);
+        }
+        
+        // Mock suggestions
+        const suggestions = [
+            'CVE-2024-' + query,
+            'CVE-2023-' + query,
+            query + ' vulnerability',
+            query + ' exploit'
+        ].slice(0, 4);
+        
+        showSuggestions(suggestions);
+    });
+    
+    function showSuggestions(suggestions) {
+        if (!suggestionsDiv || suggestions.length === 0) return;
+        
+        const html = suggestions.map(suggestion => 
+            `<div class="suggestion-item" style="padding: 10px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                ${suggestion}
+            </div>`
+        ).join('');
+        
+        suggestionsDiv.innerHTML = html;
+        suggestionsDiv.style.display = 'block';
+        
+        // Add click handlers
+        suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', function() {
+                searchBox.value = this.textContent.trim();
+                hideSuggestions();
+                searchBox.form.submit();
+            });
+        });
+    }
+    
+    function hideSuggestions() {
+        if (suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+        }
+    }
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchBox.contains(e.target) && (!suggestionsDiv || !suggestionsDiv.contains(e.target))) {
+            hideSuggestions();
+        }
+    });
+}
+</script>
+{% endblock %} 
