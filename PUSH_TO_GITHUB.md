@@ -1,10 +1,11 @@
-# 🚀 Push to Your CVEhive GitHub Account
+# Push to Your CVEhive GitHub Account
 
-## Your Repository is Ready!
-✅ Repository URL: https://github.com/CVEhive/CVEhive.git  
-✅ Code is committed and ready to push  
-✅ Database files excluded from push  
-✅ Old credentials cleared  
+## Your Repository is Ready
+
+Repository URL: https://github.com/CVEhive/CVEhive.git  
+Code is committed and ready to push  
+Database files excluded from push  
+Old credentials cleared  
 
 ## You Need to Authenticate
 
@@ -16,7 +17,7 @@ Since this is a new GitHub account, you need to create a Personal Access Token:
 2. Click **"Generate new token (classic)"**
 3. Give it a name: `CVEhive Project`
 4. Select scopes:
-   - ✅ `repo` (Full control of private repositories)
+   - `repo` (Full control of private repositories)
 5. Click **"Generate token"**
 6. **COPY THE TOKEN** (you won't see it again!)
 
@@ -49,13 +50,13 @@ git push -u origin main
 
 ## What Will Be Pushed
 
-✅ **61 files** (13,700+ lines of code)
-✅ All Python source code
-✅ Documentation (README, guides)
-✅ Configuration files
-✅ Templates and static files
+**61 files** (13,700+ lines of code)
+- All Python source code
+- Documentation (README, guides)
+- Configuration files
+- Templates and static files
 
-❌ **Excluded** (via .gitignore):
+**Excluded** (via .gitignore):
 - `venv/` (virtual environment)
 - `*.db`, `*.sqlite`, `*.sqlite3` (databases)
 - `.env` (secrets)
@@ -68,10 +69,10 @@ git push -u origin main
 Once pushed, visit: https://github.com/CVEhive/CVEhive
 
 You should see:
-- 📁 Full project structure
-- 📝 README.md displayed on the homepage
-- 🏷️ All commits
-- 📊 Project statistics
+- Full project structure
+- README.md displayed on the homepage
+- All commits
+- Project statistics
 
 ## Recommended: Add Topics to Repository
 
@@ -113,4 +114,3 @@ git push -u origin main
 # View ignored files
 git status --ignored
 ```
-

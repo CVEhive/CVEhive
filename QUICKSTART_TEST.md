@@ -76,30 +76,30 @@ python3 cli.py analyze cve CVE-2021-44228 --limit 3
 ## Expected output
 
 ```
-🧪 CVEhive AI Analyzer + MCP Integration Test
+CVEhive AI Analyzer + MCP Integration Test
 ==================================================
 
-🔍 Checking Requirements...
+Checking Requirements...
 
-✅ GitHub token found
-✅ MCP SDK installed
-📊 AI Provider: huggingface
-✅ Hugging Face dependencies installed
-✅ Docker installed: Docker version 24.0.6
-✅ Docker daemon running
-✅ SQLAlchemy installed
+[PASS] GitHub token found
+[PASS] MCP SDK installed
+AI Provider: huggingface
+[PASS] Hugging Face dependencies installed
+[PASS] Docker installed: Docker version 24.0.6
+[PASS] Docker daemon running
+[PASS] SQLAlchemy installed
 
 ==================================================
-✅ All critical requirements met!
+All critical requirements met!
 
-🔌 Testing MCP Connection...
+Testing MCP Connection...
 
 Initializing MCP client...
 Connecting to GitHub MCP server...
-✅ MCP server connected!
+[PASS] MCP server connected!
 
 Testing search_repositories...
-✅ Search test successful!
+[PASS] Search test successful!
 ```
 
 ---
@@ -134,11 +134,11 @@ docker pull ghcr.io/github/github-mcp-server
 
 ## What the test does
 
-1. ✅ Checks all requirements are installed
-2. ✅ Connects to GitHub MCP server
-3. ✅ Initializes AI model
-4. ✅ Tests repository search
-5. ✅ Tests full pipeline (optional)
+1. Checks all requirements are installed
+2. Connects to GitHub MCP server
+3. Initializes AI model
+4. Tests repository search
+5. Tests full pipeline (optional)
 
 ---
 
@@ -154,4 +154,3 @@ python3 cli.py analyze cve CVE-2024-12345
 # View results
 python3 cli.py db stats
 ```
-

@@ -1,11 +1,11 @@
-# ✅ Setup Complete - Next Steps
+# Setup Complete - Next Steps
 
 ## What's Working
 
-✅ Python 3.10 virtual environment created  
-✅ All dependencies installed (MCP, Transformers, Torch, Flask, etc.)  
-✅ AI/MCP pipeline code implemented  
-✅ Docker is installed  
+- Python 3.10 virtual environment created  
+- All dependencies installed (MCP, Transformers, Torch, Flask, etc.)  
+- AI/MCP pipeline code implemented  
+- Docker is installed  
 
 ## Required: GitHub Personal Access Token
 
@@ -18,9 +18,9 @@ Visit: https://github.com/settings/tokens
 Click **"Generate new token (classic)"**
 
 Select these permissions:
-- ✅ `public_repo` (access public repositories)
-- ✅ `read:org` (read organization data)
-- ✅ `read:user` (read user profile data)
+- `public_repo` (access public repositories)
+- `read:org` (read organization data)
+- `read:user` (read user profile data)
 
 Copy the generated token.
 
@@ -148,4 +148,3 @@ python cli.py --help
 python cli.py analyze --help
 python cli.py cve --help
 ```
-
